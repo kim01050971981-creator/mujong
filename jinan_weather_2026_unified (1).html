@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>화성 진안동 2026 날씨 · 농업관리</title>
+<style>
+  :root {
+    --blue: #1d4ed8;
+    --blue-light: #3b82f6;
+    --blue-pale: #dbeafe;
+    --red: #dc2626;
+    --red-pale: #fee2e2;
+    --khaki: #92400e;
+    --khaki-pale: #fef3c7;
+    --khaki-bg: #fffbeb;
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-400: #9ca3af;
+    --gray-600: #4b5563;
+    --gray-800: #1f2937;
+    --green: #166534;
+    --green-pale: #dcfce7;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; background: var(--gray-50); color: var(--gray-800); font-size: 14px; }
+
+  /* HEADER */
+  .app-header { background: var(--blue); color: #fff; padding: 12px 16px; }
+  .app-header h1 { font-size: 16px; font-weight: 700; letter-spacing: -0.3px; }
+  .app-header .subtitle { font-size: 11px; opacity: 0.75; margin-top: 2px; }
+
+  /* ALERT BANNER */
+  .alert-banner { background: var(--red); color: #fff; padding: 7px 16px; font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+  .alert-banner.warn { background: #d97706; }
+  .alert-banner.info { background: var(--blue-light); }
+
+  /* TABS */
+  .tabs { display: flex; overflow-x: auto; background: #fff; border-bottom: 2px solid var(--blue); -webkit-overflow-scrolling: touch; }
+  .tab { flex-shrink: 0; padding: 10px 14px; font-size: 12px; font-weight: 600; color: var(--gray-600); cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; white-space: nowrap; }
+  .tab.active { color: var(--blue); border-bottom-color: var(--blue); }
+
+  /* CONTENT */
+  .tab-content { display: none; padding: 14px; }
+  .tab-content.active { display: block; }
+
+  /* CARDS */
+  .card { background: #fff; border: 1px solid var(--gray-200); border-radius: 6px; padding: 12px; margin-bottom: 12px; }
+  .card-title { font-size: 12px; font-weight: 700; color: var(--blue); margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid var(--gray-200); text-transform: uppercase; letter-spacing: 0.5px; }
+  .card.red-border { border-left: 3px solid var(--red); }
+  .card.khaki-border { border-left: 3px solid var(--khaki); background: var(--khaki-bg); }
+  .card.blue-border { border-left: 3px solid var(--blue); }
+  .card.green-border { border-left: 3px solid #16a34a; background: #f0fdf4; }
+
+  /* DATA ROWS */
+  .data-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 1px solid var(--gray-100); font-size: 13px; }
+  .data-row:last-child { border-bottom: none; }
+  .data-key { color: var(--gray-600); }
+  .data-val { font-weight: 600; }
+  .data-val.red { color: var(--red); }
+  .data-val.blue { color: var(--blue); }
+  .data-val.khaki { color: var(--khaki); }
+  .data-val.green { color: var(--green); }
+
+  /* MONTHLY GRID */
+  .month-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .month-cell { background: #fff; border: 1px solid var(--gray-200); border-radius: 6px; padding: 10px; }
+  .month-cell .m-name { font-size: 11px; font-weight: 700; color: var(--blue); margin-bottom: 6px; }
+  .month-cell .m-pred { font-size: 11px; color: var(--gray-600); }
+  .month-cell .m-actual { font-size: 12px; font-weight: 600; margin-top: 3px; }
+  .month-cell .m-bar-bg { background: var(--gray-100); border-radius: 3px; height: 6px; margin-top: 5px; overflow: hidden; }
+  .month-cell .m-bar { background: var(--blue-light); height: 100%; border-radius: 3px; transition: width 0.4s; }
+  .month-cell .m-bar.over { background: var(--red); }
+  .month-cell.past-month { border-color: var(--blue-pale); }
+  .month-cell.current-month { border-color: var(--blue); border-width: 2px; }
+  label.input-label { font-size: 11px; color: var(--khaki); font-weight: 600; display: block; margin-top: 6px; }
+  input.data-input { width: 100%; border: 1px solid var(--gray-200); border-radius: 4px; padding: 4px 7px; font-size: 12px; margin-top: 3px; background: var(--khaki-pale); }
+  input.data-input:focus { outline: 2px solid var(--blue); }
+
+  /* DAILY HEATMAP */
+  .heatmap-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; margin-top: 8px; }
+  .heatmap-header { text-align: center; font-size: 10px; font-weight: 700; color: var(--gray-400); padding: 2px 0; }
+  .heatmap-cell { aspect-ratio: 1; border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 600; cursor: pointer; border: 1px solid transparent; }
+  .heatmap-cell.empty { background: transparent; }
+  .heatmap-cell.d0 { background: var(--gray-100); color: var(--gray-600); }
+  .heatmap-cell.d1 { background: #bfdbfe; color: #1e40af; }
+  .heatmap-cell.d2 { background: #3b82f6; color: #fff; }
+  .heatmap-cell.d3 { background: #1d4ed8; color: #fff; }
+  .heatmap-cell.d4 { background: #1e3a8a; color: #fff; }
+  .heatmap-cell.today { border-color: var(--red) !important; border-width: 2px !important; }
+  .heatmap-cell.actual { border-color: var(--khaki) !important; }
+
+  /* CHECKLIST */
+  .checklist-item { display: flex; align-items: flex-start; gap: 8px; padding: 7px 0; border-bottom: 1px solid var(--gray-100); }
+  .checklist-item:last-child { border-bottom: none; }
+  .checklist-item input[type=checkbox] { margin-top: 2px; flex-shrink: 0; width: 15px; height: 15px; accent-color: var(--blue); }
+  .checklist-item label { font-size: 12px; line-height: 1.5; cursor: pointer; }
+  .checklist-item.done label { text-decoration: line-through; color: var(--gray-400); }
+  .check-cat { font-size: 10px; font-weight: 700; background: var(--blue-pale); color: var(--blue); padding: 2px 6px; border-radius: 10px; margin-bottom: 6px; display: inline-block; }
+
+  /* COMPARE CHART */
+  .compare-row { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; font-size: 12px; }
+  .compare-label { width: 30px; text-align: right; flex-shrink: 0; font-weight: 600; }
+  .bar-wrap { flex: 1; }
+  .bar-pred { background: var(--gray-200); height: 18px; border-radius: 3px; display: flex; align-items: center; padding-left: 4px; font-size: 10px; color: var(--gray-600); position: relative; margin-bottom: 2px; }
+  .bar-actual { background: var(--blue-light); height: 18px; border-radius: 3px; display: flex; align-items: center; padding-left: 4px; font-size: 10px; color: #fff; position: relative; }
+  .bar-actual.over { background: var(--red); }
+
+  /* ENSO TIMELINE */
+  .enso-bar-wrap { display: flex; gap: 3px; margin-top: 8px; flex-wrap: wrap; }
+  .enso-bar-item { text-align: center; flex: 1; min-width: 28px; }
+  .enso-bar-bg { background: var(--gray-100); border-radius: 3px; height: 60px; display: flex; align-items: flex-end; overflow: hidden; }
+  .enso-bar-fill { width: 100%; background: var(--blue-light); border-radius: 3px 3px 0 0; transition: height 0.4s; }
+  .enso-bar-fill.high { background: var(--red); }
+  .enso-bar-fill.mid { background: #f59e0b; }
+  .enso-label { font-size: 9px; color: var(--gray-600); margin-top: 3px; }
+  .enso-pct { font-size: 10px; font-weight: 700; }
+
+  /* SAVE BUTTON */
+  .btn { display: inline-block; padding: 8px 16px; border-radius: 5px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; }
+  .btn-blue { background: var(--blue); color: #fff; }
+  .btn-khaki { background: var(--khaki); color: #fff; }
+  .btn-sm { padding: 5px 10px; font-size: 11px; }
+  .save-row { display: flex; gap: 8px; margin-top: 10px; }
+
+  /* LEGEND */
+  .legend { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+  .legend-item { display: flex; align-items: center; gap: 4px; font-size: 11px; }
+  .legend-dot { width: 12px; height: 12px; border-radius: 2px; }
+
+  /* SECTION TITLE */
+  .section-title { font-size: 13px; font-weight: 700; color: var(--gray-800); margin: 14px 0 8px; border-left: 3px solid var(--blue); padding-left: 8px; }
+
+  /* PROGRESS */
+  .progress-wrap { margin-top: 6px; }
+  .progress-label { display: flex; justify-content: space-between; font-size: 11px; color: var(--gray-600); margin-bottom: 3px; }
+  .progress-bg { background: var(--gray-100); border-radius: 10px; height: 8px; overflow: hidden; }
+  .progress-fill { background: var(--blue); height: 100%; border-radius: 10px; transition: width 0.4s; }
+
+  /* TAG */
+  .tag { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 10px; margin-left: 4px; }
+  .tag.red { background: var(--red-pale); color: var(--red); }
+  .tag.blue { background: var(--blue-pale); color: var(--blue); }
+  .tag.khaki { background: var(--khaki-pale); color: var(--khaki); }
+  .tag.green { background: var(--green-pale); color: var(--green); }
+
+  /* FOOTER */
+  .app-footer { text-align: center; padding: 16px; font-size: 11px; color: var(--gray-400); border-top: 1px solid var(--gray-200); margin-top: 8px; }
+
+  /* MODAL */
+  .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 100; align-items: flex-end; }
+  .modal-bg.open { display: flex; }
+  .modal { background: #fff; width: 100%; border-radius: 16px 16px 0 0; padding: 20px; max-height: 80vh; overflow-y: auto; }
+  .modal-title { font-size: 15px; font-weight: 700; margin-bottom: 12px; }
+  .modal-close { float: right; font-size: 18px; cursor: pointer; color: var(--gray-400); }
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <h1>화성 진안동 2026 날씨 · 농업</h1>
+  <div class="subtitle">수원좌표 기준 · Open-Meteo 자동연동 · v3.1 (2026.06.12)</div>
+</div>
+
+<div class="alert-banner red" id="mainAlert">
+  고온다습 여름 예상 — 7·8월 집중호우 대비 필요
+</div>
+
+<div class="tabs" id="tabBar">
+  <div class="tab active" data-tab="monthly">월별 기록</div>
+  <div class="tab" data-tab="daily">일별 예측</div>
+  <div class="tab" data-tab="compare">예측·실측</div>
+  <div class="tab" data-tab="farm">농업 관리</div>
+  <div class="tab" data-tab="climate">기후 정보</div>
+</div>
+
+<!-- ===== TAB: 월별 기록 ===== -->
+<div class="tab-content active" id="tab-monthly">
+
+  <div class="card blue-border">
+    <div class="card-title">2026 월별 강수량 예측 vs 실측 (mm)</div>
+    <div style="margin-bottom:10px;">
+      <button class="btn btn-blue btn-sm" onclick="fetchMonthlyAll()" id="fetchMonthlyBtn">자동 불러오기 (Open-Meteo)</button>
+      <span id="fetchMonthlyStatus" style="font-size:11px;color:var(--gray-600);margin-left:8px;"></span>
+    </div>
+    <div class="month-grid" id="monthGrid"></div>
+    <div class="save-row">
+      <button class="btn btn-khaki btn-sm" onclick="saveMonthly()">저장</button>
+      <button class="btn btn-blue btn-sm" onclick="resetMonthly()">초기화</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">연간 누계</div>
+    <div id="annualSummary"></div>
+  </div>
+
+  <div class="card khaki-border">
+    <div class="card-title">6월 현황 (진행 중)</div>
+    <div class="data-row"><span class="data-key">예측 강수량</span><span class="data-val blue">88 mm</span></div>
+    <div class="data-row"><span class="data-key">오늘 날씨</span><span class="data-val">화창 24°C / 최고 28°</span></div>
+    <div class="data-row"><span class="data-key">이번 달 특이사항</span><span class="data-val">장마 시작 전 건조</span></div>
+    <label class="input-label">6월 현재까지 실측 누계 (mm)</label>
+    <input type="number" class="data-input" id="june-current" placeholder="직접 입력">
+  </div>
+
+  <div class="card" id="debugCard" style="display:none;">
+    <div class="card-title" style="display:flex;justify-content:space-between;">
+      디버그 로그
+      <button class="btn btn-sm" style="background:var(--gray-200);font-size:10px;" onclick="document.getElementById('debugLog').textContent=''">지우기</button>
+    </div>
+    <pre id="debugLog" style="font-size:10px;color:var(--gray-600);white-space:pre-wrap;word-break:break-all;max-height:150px;overflow-y:auto;"></pre>
+  </div>
+
+</div> -->
+<div class="tab-content" id="tab-daily">
+
+  <div class="card">
+    <div class="card-title">월 선택</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;" id="monthPicker"></div>
+  </div>
+
+  <div class="card" id="dailyCard">
+    <div class="card-title" id="dailyTitle">6월 일별 예측 강수량</div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:var(--gray-100)"></div> 0mm</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#bfdbfe"></div> 1-9</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div> 10-29</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#1d4ed8"></div> 30-59</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#1e3a8a"></div> 60+</div>
+    </div>
+    <div class="heatmap-grid" id="heatmapGrid">
+      <div class="heatmap-header">일</div><div class="heatmap-header">월</div><div class="heatmap-header">화</div>
+      <div class="heatmap-header">수</div><div class="heatmap-header">목</div><div class="heatmap-header">금</div><div class="heatmap-header">토</div>
+    </div>
+    <div style="margin-top:10px;" id="dailyList"></div>
+  </div>
+
+  <div class="card khaki-border">
+    <div class="card-title">실측 입력</div>
+    <div style="margin-bottom:8px;">
+      <button class="btn btn-blue btn-sm" onclick="fetchDailyActuals()" id="fetchDailyBtn">자동 불러오기 (Open-Meteo)</button>
+      <span id="fetchDailyStatus" style="font-size:11px;color:var(--gray-600);margin-left:8px;"></span>
+    </div>
+    <div id="actualInputArea"></div>
+    <button class="btn btn-khaki btn-sm" style="margin-top:8px" onclick="saveActuals()">실측 저장</button>
+  </div>
+
+</div>
+
+<!-- ===== TAB: 예측·실측 비교 ===== -->
+<div class="tab-content" id="tab-compare">
+
+  <div class="card">
+    <div class="card-title">월별 예측 vs 실측 비교</div>
+    <div id="compareChart"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">오차 분석</div>
+    <div id="errorAnalysis"></div>
+  </div>
+
+</div>
+
+<!-- ===== TAB: 농업 관리 ===== -->
+<div class="tab-content" id="tab-farm">
+
+  <div class="card red-border">
+    <div class="card-title">6월 농업 주요 작업 <span class="tag red">진행 중</span></div>
+    <span class="check-cat">고추 관리</span>
+    <div id="check-june-pepper"></div>
+    <span class="check-cat" style="margin-top:8px;display:block;">모종/파종</span>
+    <div id="check-june-seed"></div>
+    <div class="progress-wrap" id="june-progress"></div>
+  </div>
+
+  <div class="card khaki-border">
+    <div class="card-title">7월 장마 대비 <span class="tag khaki">예비</span></div>
+    <span class="check-cat">배수/시설 점검</span>
+    <div id="check-july-drain"></div>
+    <span class="check-cat" style="margin-top:8px;display:block;">병해충 방제</span>
+    <div id="check-july-pest"></div>
+    <div class="progress-wrap" id="july-progress"></div>
+  </div>
+
+  <div class="card blue-border">
+    <div class="card-title">8·9월 수확 준비 <span class="tag blue">예비</span></div>
+    <span class="check-cat">수확 체크</span>
+    <div id="check-aug"></div>
+    <div class="progress-wrap" id="aug-progress"></div>
+  </div>
+
+  <div class="card green-border">
+    <div class="card-title">메모</div>
+    <textarea id="farmMemo" style="width:100%;height:80px;border:1px solid var(--gray-200);border-radius:4px;padding:6px;font-size:12px;resize:vertical;background:var(--khaki-bg);" placeholder="농장 메모..."></textarea>
+    <button class="btn btn-khaki btn-sm" style="margin-top:6px" onclick="saveMemo()">저장</button>
+  </div>
+
+</div>
+
+<!-- ===== TAB: 기후 정보 ===== -->
+<div class="tab-content" id="tab-climate">
+
+  <div class="card red-border">
+    <div class="card-title">2026 엘니뇨 동향 (최신)</div>
+    <div class="data-row"><span class="data-key">NOAA 6~8월 발생확률</span><span class="data-val red">62%</span></div>
+    <div class="data-row"><span class="data-key">WMO 6~8월 형성확률</span><span class="data-val red">80%</span></div>
+    <div class="data-row"><span class="data-key">WMO 11월까지 지속확률</span><span class="data-val red">90%+</span></div>
+    <div class="data-row"><span class="data-key">현재 ENSO 상태</span><span class="data-val khaki">중립→엘니뇨 전환 중</span></div>
+    <div class="data-row"><span class="data-key">Nino3.4 SST 편차</span><span class="data-val khaki">+0.3°C (4월 기준)</span></div>
+    <div class="data-row"><span class="data-key">전지구 해양열파 면적</span><span class="data-val red">27% (예측치 23% 초과)</span></div>
+    <div style="margin-top:10px;">
+      <div style="font-size:11px;color:var(--gray-600);margin-bottom:4px;">엘니뇨 확률 추이 (CPC 발표)</div>
+      <div class="enso-bar-wrap" id="ensoTimeline"></div>
+    </div>
+    <label class="input-label">최신 NOAA CPC 발표값 입력 (%)</label>
+    <input type="number" class="data-input" id="enso-latest" placeholder="숫자만">
+    <button class="btn btn-khaki btn-sm" style="margin-top:6px" onclick="saveEnso()">저장</button>
+  </div>
+
+  <div class="card blue-border">
+    <div class="card-title">기상청 2026 여름(6~8월) 전망</div>
+    <div class="section-title" style="font-size:12px;margin:8px 0 4px;">기온 전망</div>
+    <div class="data-row"><span class="data-key">6월</span><span class="data-val red">평년보다 높음 60%</span></div>
+    <div class="data-row"><span class="data-key">7월</span><span class="data-val red">평년보다 높음 60%</span></div>
+    <div class="data-row"><span class="data-key">8월</span><span class="data-val khaki">평년보다 높음 50%</span></div>
+    <div class="section-title" style="font-size:12px;margin:8px 0 4px;">강수량 전망</div>
+    <div class="data-row"><span class="data-key">6월</span><span class="data-val blue">평년보다 많음</span></div>
+    <div class="data-row"><span class="data-key">7월</span><span class="data-val blue">평년보다 많음</span></div>
+    <div class="data-row"><span class="data-key">8월</span><span class="data-val">평년 비슷</span></div>
+    <div class="data-row"><span class="data-key">국지적 집중호우</span><span class="data-val red">가능성 높음</span></div>
+    <div class="data-row"><span class="data-key">태풍</span><span class="data-val">평년 수준 (8~9월)</span></div>
+  </div>
+
+  <div class="card khaki-border">
+    <div class="card-title">신규 기상특보 제도 (2026)</div>
+    <div class="data-row"><span class="data-key">폭염중대경보</span><span class="data-val red">신설</span></div>
+    <div class="data-row"><span class="data-key">열대야주의보</span><span class="data-val red">신설</span></div>
+    <div class="data-row"><span class="data-key">재난성호우 긴급재난문자</span><span class="data-val red">신설</span></div>
+    <div style="font-size:11px;color:var(--gray-600);margin-top:6px;line-height:1.6;">
+      기상청 이상고온·집중호우 피해 우려에 따라 여름철 재해 대응 강화.
+      북태평양고기압 가장자리 변화로 강수 지역 변동성 매우 클 수 있음.
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">수원 관측소(119) 강수량 평년값</div>
+    <div id="normalValues"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">엘니뇨 보정 계수 (v3.0)</div>
+    <div class="data-row"><span class="data-key">6월</span><span class="data-val blue">+5% (평년 多 반영)</span></div>
+    <div class="data-row"><span class="data-key">7월</span><span class="data-val blue">+15% (장마 강화)</span></div>
+    <div class="data-row"><span class="data-key">8월</span><span class="data-val">±0% (평년 비슷)</span></div>
+    <div class="data-row"><span class="data-key">9월</span><span class="data-val khaki">-10% (북풍기류)</span></div>
+    <div class="data-row"><span class="data-key">10월</span><span class="data-val">±0%</span></div>
+  </div>
+
+</div>
+
+<div class="app-footer">
+  화성 진안동 농업기상 v3.0 · 수원관측소(119) 기준 · 2026.06.12
+</div>
+
+<!-- MODAL -->
+<div class="modal-bg" id="modalBg" onclick="closeModal(event)">
+  <div class="modal">
+    <span class="modal-close" onclick="document.getElementById('modalBg').classList.remove('open')">✕</span>
+    <div class="modal-title" id="modalTitle"></div>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+const NORMAL = {
+  1:{pred:24,normal:24}, 2:{pred:36,normal:36}, 3:{pred:42,normal:42},
+  4:{pred:65,normal:65}, 5:{pred:88,normal:82},
+  6:{pred:88,normal:84},  // +5% 엘니뇨 보정
+  7:{pred:310,normal:270}, // +15%
+  8:{pred:300,normal:300}, // ±0%
+  9:{pred:116,normal:129}, // -10%
+  10:{pred:52,normal:52}, 11:{pred:52,normal:52}, 12:{pred:19,normal:19}
+};
+const MONTH_KO = ['','1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+const MONTH_SHORT = ['','1','2','3','4','5','6','7','8','9','10','11','12'];
+const TODAY = new Date(2026,5,12); // June 12
+const CURRENT_MONTH = 6;
+
+// Daily predicted rain by month (mm/day)
+const DAILY_PRED = {
+  1: [0,0,0,1,0,0,0,0,0,0,2,0,1,0,0,0,0,3,1,0,0,0,0,0,2,0,0,4,0,2,0],
+  2: [0,0,2,1,0,3,0,0,0,0,1,0,0,4,2,0,0,0,1,0,3,5,0,0,0,2,1,0,0,0,0],
+  3: [0,0,1,3,0,0,2,0,0,1,5,2,0,0,0,3,1,0,0,2,4,1,0,0,0,2,0,3,1,0,0],
+  4: [0,2,0,0,5,3,0,0,1,8,4,0,0,2,0,0,6,3,1,0,0,4,8,2,0,0,5,3,0,0,0],
+  5: [0,0,3,8,2,0,5,10,4,1,0,2,6,12,8,3,0,0,4,63,7,0,2,1,0,3,8,5,2,0,1],
+  6: [0,1,0,0,2,0,3,1,0,0,2,1,0,0,0,2,1,3,0,5,2,0,1,0,3,8,12,18,4,0,0],
+  7: [5,2,8,15,3,0,20,35,12,5,0,8,25,40,18,6,2,12,30,45,20,8,3,15,38,50,22,10,5,18,35],
+  8: [25,12,5,18,35,20,8,3,15,30,18,6,2,10,25,18,5,0,12,22,15,4,1,8,20,12,3,8,15,10,5],
+  9: [3,8,15,5,0,2,10,18,12,4,0,1,6,14,8,2,0,3,9,12,5,1,0,4,8,5,2,0,1,4,0],
+  10:[0,0,1,3,5,2,0,0,1,4,6,3,0,0,0,2,5,3,1,0,0,2,4,2,0,0,1,3,2,0,0],
+  11:[0,1,3,5,2,0,0,1,4,6,3,1,0,0,2,5,4,1,0,0,1,3,5,3,1,0,0,2,4,2,0],
+  12:[0,0,1,2,1,0,0,1,2,3,1,0,0,1,2,1,0,0,1,2,1,0,0,0,1,2,1,0,0,1,0]
+};
+
+// Storage helpers
+const S = {
+  get: k => { try { return JSON.parse(localStorage.getItem('jinan_'+k)) } catch(e) { return null } },
+  set: (k,v) => localStorage.setItem('jinan_'+k, JSON.stringify(v))
+};
+
+// ============================================================
+// TABS
+// ============================================================
+document.querySelectorAll('.tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById('tab-'+t.dataset.tab).classList.add('active');
+  });
+});
+
+// ============================================================
+// MONTHLY TAB
+// ============================================================
+function renderMonthly() {
+  const actuals = S.get('monthly') || {};
+  const grid = document.getElementById('monthGrid');
+  grid.innerHTML = '';
+  let totalPred = 0, totalActual = 0;
+
+  for (let m = 1; m <= 12; m++) {
+    const pred = NORMAL[m].pred;
+    totalPred += pred;
+    const actual = actuals[m] !== undefined ? actuals[m] : null;
+    if (actual !== null) totalActual += actual;
+    const pct = actual !== null ? Math.min(actual / pred * 100, 140) : 0;
+    const isPast = m < CURRENT_MONTH;
+    const isCurrent = m === CURRENT_MONTH;
+
+    const cell = document.createElement('div');
+    cell.className = 'month-cell' + (isPast ? ' past-month' : '') + (isCurrent ? ' current-month' : '');
+    cell.innerHTML = `
+      <div class="m-name">${MONTH_KO[m]}${isCurrent ? ' <span class="tag blue">진행</span>' : ''}</div>
+      <div class="m-pred">예측 ${pred}mm</div>
+      ${actual !== null
+        ? `<div class="m-actual" style="color:${actual>pred?'var(--red)':'var(--blue)'}">${actual}mm (${actual>pred?'+':''}${actual-pred})</div>`
+        : `<div class="m-actual" style="color:var(--gray-400)">미입력</div>`}
+      <div class="m-bar-bg"><div class="m-bar ${actual>pred?'over':''}" style="width:${pct}%"></div></div>
+      ${(isCurrent || !isPast) ? `
+        <label class="input-label">실측 입력 (mm)</label>
+        <input type="number" class="data-input month-input" data-m="${m}" value="${actual !== null ? actual : ''}" placeholder="예: ${pred}">
+      ` : ''}
+    `;
+    grid.appendChild(cell);
+  }
+
+  const summary = document.getElementById('annualSummary');
+  summary.innerHTML = `
+    <div class="data-row"><span class="data-key">연간 예측 합계</span><span class="data-val blue">${totalPred}mm</span></div>
+    <div class="data-row"><span class="data-key">현재까지 실측 합계</span><span class="data-val ${totalActual > totalPred * (CURRENT_MONTH/12) ? 'red' : 'blue'}">${totalActual}mm</span></div>
+  `;
+}
+
+function saveMonthly() {
+  const actuals = S.get('monthly') || {};
+  document.querySelectorAll('.month-input').forEach(inp => {
+    const m = inp.dataset.m;
+    const v = parseFloat(inp.value);
+    if (!isNaN(v)) actuals[m] = v;
+  });
+  S.set('monthly', actuals);
+  renderMonthly();
+  renderCompare();
+  alert('저장됐습니다.');
+}
+
+function resetMonthly() {
+  if (confirm('실측 데이터를 모두 삭제할까요?')) {
+    S.set('monthly', {});
+    renderMonthly();
+    renderCompare();
+  }
+}
+
+// ============================================================
+// DAILY TAB
+// ============================================================
+let selectedMonth = 6;
+
+function renderMonthPicker() {
+  const picker = document.getElementById('monthPicker');
+  picker.innerHTML = '';
+  for (let m = 1; m <= 12; m++) {
+    const btn = document.createElement('button');
+    btn.className = 'btn btn-sm ' + (m === selectedMonth ? 'btn-blue' : '');
+    btn.style.cssText = m !== selectedMonth ? 'background:var(--gray-100);color:var(--gray-800);' : '';
+    btn.textContent = MONTH_KO[m];
+    btn.onclick = () => { selectedMonth = m; renderMonthPicker(); renderHeatmap(); renderActualInputs(); };
+    picker.appendChild(btn);
+  }
+}
+
+function getDayClass(mm) {
+  if (mm === 0) return 'd0';
+  if (mm < 10) return 'd1';
+  if (mm < 30) return 'd2';
+  if (mm < 60) return 'd3';
+  return 'd4';
+}
+
+function renderHeatmap() {
+  const m = selectedMonth;
+  const actuals = S.get('actuals_'+m) || {};
+  document.getElementById('dailyTitle').textContent = MONTH_KO[m] + ' 일별 예측 강수량';
+  const grid = document.getElementById('heatmapGrid');
+  // keep headers
+  const headers = ['일','월','화','수','목','금','토'].map(d => `<div class="heatmap-header">${d}</div>`).join('');
+  
+  const firstDay = new Date(2026, m-1, 1).getDay();
+  const daysInMonth = new Date(2026, m, 0).getDate();
+  const preds = DAILY_PRED[m] || [];
+
+  let cells = headers;
+  for (let i = 0; i < firstDay; i++) cells += `<div class="heatmap-cell empty"></div>`;
+  for (let d = 1; d <= daysInMonth; d++) {
+    const pred = preds[d-1] || 0;
+    const actual = actuals[d] !== undefined ? actuals[d] : null;
+    const displayMm = actual !== null ? actual : pred;
+    const cls = getDayClass(displayMm);
+    const isToday = (m === 6 && d === 12);
+    const hasActual = actual !== null;
+    cells += `<div class="heatmap-cell ${cls}${isToday?' today':''}${hasActual?' actual':''}" 
+      title="${d}일: ${hasActual ? '실측'+actual : '예측'+pred}mm"
+      onclick="showDayDetail(${m},${d},${pred},${actual !== null ? actual : 'null'})">${d}</div>`;
+  }
+  grid.innerHTML = cells;
+
+  // list
+  const list = document.getElementById('dailyList');
+  let html = '';
+  const rainDays = preds.map((p,i) => ({d:i+1, p})).filter(x => x.p > 0);
+  rainDays.forEach(({d, p}) => {
+    const actual = actuals[d] !== undefined ? actuals[d] : null;
+    html += `<div class="data-row">
+      <span class="data-key">${m}/${d}</span>
+      <span class="data-val">예측 ${p}mm${actual !== null ? ` / 실측 <b style="color:${actual>p?'var(--red)':'var(--blue)'}">${actual}mm</b>` : ''}</span>
+    </div>`;
+  });
+  list.innerHTML = html || '<div style="color:var(--gray-400);font-size:12px;padding:8px 0;">이 달 강수 예측 없음</div>';
+}
+
+function renderActualInputs() {
+  const m = selectedMonth;
+  const actuals = S.get('actuals_'+m) || {};
+  const daysInMonth = new Date(2026, m, 0).getDate();
+  const preds = DAILY_PRED[m] || [];
+  let html = '<div style="font-size:11px;color:var(--gray-600);margin-bottom:8px;">강수 있는 날만 표시됩니다.</div>';
+  for (let d = 1; d <= daysInMonth; d++) {
+    const pred = preds[d-1] || 0;
+    if (pred > 0 || actuals[d] !== undefined) {
+      html += `<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;">
+        <span style="font-size:12px;min-width:36px;">${m}/${d}</span>
+        <span style="font-size:11px;color:var(--gray-400);">예측 ${pred}mm</span>
+        <input type="number" class="data-input actual-inp" data-d="${d}" value="${actuals[d] !== undefined ? actuals[d] : ''}" placeholder="실측" style="width:70px;">
+      </div>`;
+    }
+  }
+  document.getElementById('actualInputArea').innerHTML = html;
+}
+
+function saveActuals() {
+  const m = selectedMonth;
+  const actuals = S.get('actuals_'+m) || {};
+  document.querySelectorAll('.actual-inp').forEach(inp => {
+    const d = inp.dataset.d;
+    const v = parseFloat(inp.value);
+    if (!isNaN(v)) actuals[d] = v;
+    else delete actuals[d];
+  });
+  S.set('actuals_'+m, actuals);
+  renderHeatmap();
+  alert('저장됐습니다.');
+}
+
+function showDayDetail(m, d, pred, actual) {
+  document.getElementById('modalTitle').textContent = `${m}월 ${d}일 상세`;
+  document.getElementById('modalBody').innerHTML = `
+    <div class="data-row"><span class="data-key">예측 강수량</span><span class="data-val blue">${pred}mm</span></div>
+    ${actual !== null ? `<div class="data-row"><span class="data-key">실측 강수량</span><span class="data-val ${actual>pred?'red':'blue'}">${actual}mm</span></div>` : ''}
+    <label class="input-label" style="margin-top:10px;">실측 입력 (mm)</label>
+    <input type="number" id="modal-actual-inp" class="data-input" value="${actual !== null ? actual : ''}" placeholder="${pred}">
+    <div class="save-row" style="margin-top:10px;">
+      <button class="btn btn-blue btn-sm" onclick="saveModalActual(${m},${d})">저장</button>
+    </div>
+  `;
+  document.getElementById('modalBg').classList.add('open');
+}
+
+function saveModalActual(m, d) {
+  const v = parseFloat(document.getElementById('modal-actual-inp').value);
+  if (!isNaN(v)) {
+    const actuals = S.get('actuals_'+m) || {};
+    actuals[d] = v;
+    S.set('actuals_'+m, actuals);
+    renderHeatmap();
+    document.getElementById('modalBg').classList.remove('open');
+  }
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('modalBg')) document.getElementById('modalBg').classList.remove('open');
+}
+
+// ============================================================
+// OPEN-METEO 자동 불러오기
+// 수원 좌표: 37.2636, 127.0286
+// ERA5-Land 기반 과거 강수량 (CORS 허용, 키 불필요)
+// ============================================================
+const LAT = 37.2636;
+const LON = 127.0286;
+
+// Open-Meteo 직접 fetch (CORS 허용 API)
+// open-meteo.com 은 Access-Control-Allow-Origin: * 헤더를 반환하므로
+// 프록시 없이 직접 호출 가능. 단, claude.ai 미리보기 환경에서는
+// 외부 fetch 자체가 차단될 수 있음 → 파일을 로컬/GitHub Pages에서 열면 정상 동작.
+function dbg(msg) {
+  const el = document.getElementById('debugLog');
+  if (el) el.textContent += '\n' + new Date().toLocaleTimeString('ko-KR') + ' ' + msg;
+  console.log('[날씨앱]', msg);
+}
+
+async function fetchOpenMeteo(startDate, endDate) {
+  const url = `https://archive-api.open-meteo.com/v1/archive?latitude=${LAT}&longitude=${LON}&start_date=${startDate}&end_date=${endDate}&daily=precipitation_sum&timezone=Asia%2FSeoul`;
+  dbg('요청: ' + url);
+  try {
+    const res = await fetch(url);
+    dbg('응답코드: ' + res.status);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    dbg('데이터 수신: ' + data.daily.time.length + '일');
+    return data;
+  } catch(e) {
+    dbg('오류: ' + e.name + ' / ' + e.message);
+    throw e;
+  }
+}
+
+async function fetchOpenMeteoForecast(forecastDays) {
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&daily=precipitation_sum&timezone=Asia%2FSeoul&forecast_days=${forecastDays}`;
+  dbg('예측요청: ' + url);
+  try {
+    const res = await fetch(url);
+    dbg('응답코드: ' + res.status);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch(e) {
+    dbg('오류: ' + e.name + ' / ' + e.message);
+    throw e;
+  }
+}
+
+// 월별 전체 자동 불러오기 (1월~현재월까지)
+async function fetchMonthlyAll() {
+  const btn = document.getElementById('fetchMonthlyBtn');
+  const status = document.getElementById('fetchMonthlyStatus');
+  document.getElementById('debugCard').style.display = 'block';
+  dbg('=== 월별 자동불러오기 시작 ===');
+  btn.disabled = true;
+  status.textContent = '불러오는 중...';
+  status.style.color = 'var(--blue)';
+  status.style.color = 'var(--blue)';
+
+  try {
+    const today = new Date(2026, 5, 12); // June 12
+    const startDate = '2026-01-01';
+    const endDate = `2026-06-12`;
+
+    const data = await fetchOpenMeteo(startDate, endDate);
+    const times = data.daily.time;
+    const rains = data.daily.precipitation_sum;
+
+    // 월별 합산
+    const actuals = S.get('monthly') || {};
+    const monthlySum = {};
+    times.forEach((t, i) => {
+      const m = parseInt(t.split('-')[1]);
+      const r = rains[i] || 0;
+      monthlySum[m] = (monthlySum[m] || 0) + r;
+    });
+
+    // 현재 진행 중인 달(6월)은 일별 합계로 저장
+    Object.keys(monthlySum).forEach(m => {
+      actuals[m] = Math.round(monthlySum[m] * 10) / 10;
+    });
+    S.set('monthly', actuals);
+    renderMonthly();
+    renderCompare();
+
+    status.textContent = `완료! 1~6월 데이터 업데이트됨 (${new Date().toLocaleTimeString('ko-KR')})`;
+    status.style.color = 'var(--green)';
+  } catch(e) {
+    const msg = e.message.includes('Failed to fetch') || e.message.includes('fetch')
+      ? '네트워크 차단 — GitHub Pages에서 열면 정상 작동'
+      : '오류: ' + e.message;
+    document.getElementById('fetchMonthlyStatus').textContent = msg;
+    document.getElementById('fetchMonthlyStatus').style.color = 'var(--red)';
+  } finally {
+    document.getElementById('fetchMonthlyBtn').disabled = false;
+  }
+}
+async function fetchDailyActuals() {
+  const btn = document.getElementById('fetchDailyBtn');
+  const status = document.getElementById('fetchDailyStatus');
+  btn.disabled = true;
+  status.textContent = '불러오는 중...';
+  status.style.color = 'var(--blue)';
+
+  try {
+    const m = selectedMonth;
+    const daysInMonth = new Date(2026, m, 0).getDate();
+    const mm = String(m).padStart(2, '0');
+
+    // 미래달은 예측 API 사용, 과거달은 archive API
+    const today = new Date(2026, 5, 12);
+    const monthStart = new Date(2026, m-1, 1);
+    const monthEnd = new Date(2026, m-1, daysInMonth);
+
+    let data;
+    if (monthStart > today) {
+      // 미래달: forecast API
+      const diffDays = Math.ceil((monthEnd - today) / 86400000) + 10;
+      data = await fetchOpenMeteoForecast(Math.min(diffDays, 92));
+    } else {
+      // 과거/현재달: archive API
+      const endStr = monthEnd > today
+        ? '2026-06-12'
+        : `2026-${mm}-${String(daysInMonth).padStart(2,'0')}`;
+      data = await fetchOpenMeteo(`2026-${mm}-01`, endStr);
+    }
+
+    const times = data.daily.time;
+    const rains = data.daily.precipitation_sum;
+
+    const actuals = S.get('actuals_'+m) || {};
+    let count = 0;
+    times.forEach((t, i) => {
+      if (t.startsWith(`2026-${mm}-`)) {
+        const d = parseInt(t.split('-')[2]);
+        const r = rains[i];
+        if (r !== null && r !== undefined) {
+          actuals[d] = Math.round(r * 10) / 10;
+          count++;
+        }
+      }
+    });
+    S.set('actuals_'+m, actuals);
+    renderHeatmap();
+    renderActualInputs();
+
+    status.textContent = `완료! ${count}일치 데이터 (${new Date().toLocaleTimeString('ko-KR')})`;
+    status.style.color = 'var(--green)';
+  } catch(e) {
+    const msg = e.message.includes('fetch')
+      ? '네트워크 차단 — GitHub Pages에서 열면 정상 작동'
+      : '오류: ' + e.message;
+    document.getElementById('fetchDailyStatus').textContent = msg;
+    document.getElementById('fetchDailyStatus').style.color = 'var(--red)';
+  } finally {
+    document.getElementById('fetchDailyBtn').disabled = false;
+  }
+}
+
+// ============================================================
+function renderCompare() {
+  const actuals = S.get('monthly') || {};
+  const maxPred = Math.max(...Object.values(NORMAL).map(v => v.pred));
+  let html = '';
+  for (let m = 1; m <= 12; m++) {
+    const pred = NORMAL[m].pred;
+    const actual = actuals[m] !== undefined ? actuals[m] : null;
+    const predPct = pred / maxPred * 100;
+    const actualPct = actual !== null ? Math.min(actual / maxPred * 100, 110) : 0;
+    html += `<div class="compare-row">
+      <span class="compare-label">${MONTH_SHORT[m]}월</span>
+      <div class="bar-wrap">
+        <div class="bar-pred" style="width:${predPct}%">${pred}</div>
+        ${actual !== null ? `<div class="bar-actual ${actual>pred*1.2?'over':''}" style="width:${actualPct}%">${actual}</div>` : ''}
+      </div>
+    </div>`;
+  }
+  html += `<div style="display:flex;gap:10px;font-size:11px;margin-top:8px;">
+    <span style="display:flex;align-items:center;gap:3px;"><span style="width:12px;height:12px;background:var(--gray-200);display:inline-block;border-radius:2px;"></span>예측</span>
+    <span style="display:flex;align-items:center;gap:3px;"><span style="width:12px;height:12px;background:var(--blue-light);display:inline-block;border-radius:2px;"></span>실측</span>
+    <span style="display:flex;align-items:center;gap:3px;"><span style="width:12px;height:12px;background:var(--red);display:inline-block;border-radius:2px;"></span>초과</span>
+  </div>`;
+  document.getElementById('compareChart').innerHTML = html;
+
+  let errorHtml = '';
+  let cnt = 0, totalErr = 0;
+  for (let m = 1; m <= CURRENT_MONTH-1; m++) {
+    if (actuals[m] !== undefined) {
+      const err = actuals[m] - NORMAL[m].pred;
+      const errPct = (err / NORMAL[m].pred * 100).toFixed(1);
+      totalErr += Math.abs(err);
+      cnt++;
+      errorHtml += `<div class="data-row">
+        <span class="data-key">${MONTH_KO[m]}</span>
+        <span class="data-val ${err>0?'red':'blue'}">${err>0?'+':''}${err}mm (${err>0?'+':''}${errPct}%)</span>
+      </div>`;
+    }
+  }
+  if (cnt > 0) errorHtml += `<div class="data-row"><span class="data-key">평균 절대오차</span><span class="data-val khaki">${(totalErr/cnt).toFixed(1)}mm</span></div>`;
+  document.getElementById('errorAnalysis').innerHTML = errorHtml || '<div style="color:var(--gray-400);font-size:12px;padding:8px 0;">실측 데이터를 입력하면 분석이 표시됩니다.</div>';
+}
+
+// ============================================================
+// FARM TAB
+// ============================================================
+const TASKS = {
+  'june-pepper': [
+    '고추 생육 점검 (3~4주차 수세 확인)',
+    '진딧물·응애 예찰 및 방제',
+    '칼슘·붕소 엽면시비',
+    '초기 착과 확인 / 적과',
+    '멀칭 이음새 확인'
+  ],
+  'june-seed': [
+    '여름 파종 준비 (들깨, 콩)',
+    '상추·고추 모종 추가 이식',
+    '모종장 차광망 설치 준비'
+  ],
+  'july-drain': [
+    '하우스 배수로 정비 완료',
+    '비닐하우스 골조 점검',
+    '배수펌프 작동 확인',
+    '방풍망 설치 여부 확인'
+  ],
+  'july-pest': [
+    '탄저병 예방 방제 (6말~7초)',
+    '역병 예방 약제 준비',
+    '총채벌레 예찰',
+    '장마 후 약효 재처리 계획 수립'
+  ],
+  'aug': [
+    '고추 1차 수확 준비',
+    '건조·보관 시설 점검',
+    '태풍 대비 지주 점검',
+    '2기작 파종 일정 수립'
+  ]
+};
+
+function renderTasks(id, targetEl, progressEl) {
+  const done = S.get('tasks_'+id) || {};
+  let total = TASKS[id].length, checked = 0;
+  let html = '';
+  TASKS[id].forEach((t, i) => {
+    const isDone = done[i];
+    if (isDone) checked++;
+    html += `<div class="checklist-item${isDone?' done':''}">
+      <input type="checkbox" id="task_${id}_${i}" ${isDone?'checked':''} onchange="toggleTask('${id}',${i})">
+      <label for="task_${id}_${i}">${t}</label>
+    </div>`;
+  });
+  document.getElementById(targetEl).innerHTML = html;
+  const pct = Math.round(checked/total*100);
+  document.getElementById(progressEl).innerHTML = `
+    <div class="progress-label"><span>${checked}/${total} 완료</span><span>${pct}%</span></div>
+    <div class="progress-bg"><div class="progress-fill" style="width:${pct}%"></div></div>
+  `;
+}
+
+function toggleTask(id, i) {
+  const done = S.get('tasks_'+id) || {};
+  done[i] = !done[i];
+  S.set('tasks_'+id, done);
+  renderFarm();
+}
+
+function renderFarm() {
+  renderTasks('june-pepper', 'check-june-pepper', 'june-progress');
+  renderTasks('june-seed', 'check-june-seed', 'june-progress');
+  renderTasks('july-drain', 'check-july-drain', 'july-progress');
+  renderTasks('july-pest', 'check-july-pest', 'july-progress');
+  renderTasks('aug', 'check-aug', 'aug-progress');
+  const memo = S.get('farmMemo') || '';
+  document.getElementById('farmMemo').value = memo;
+}
+
+function saveMemo() {
+  S.set('farmMemo', document.getElementById('farmMemo').value);
+  alert('저장됐습니다.');
+}
+
+// ============================================================
+// CLIMATE TAB
+// ============================================================
+const ENSO_HISTORY = [
+  {label:'10월', pct:14}, {label:'11월', pct:18}, {label:'12월', pct:25},
+  {label:'1월', pct:38}, {label:'2월', pct:45}, {label:'3월', pct:55},
+  {label:'4월', pct:61}, {label:'5월', pct:62}, {label:'6월(WMO)', pct:80}
+];
+
+function renderEnso() {
+  const custom = S.get('enso_custom');
+  let data = [...ENSO_HISTORY];
+  if (custom) data.push({label:'최신', pct: custom});
+  const maxPct = Math.max(...data.map(d => d.pct));
+  let html = '';
+  data.forEach(d => {
+    const h = Math.round(d.pct / 100 * 60);
+    const cls = d.pct >= 70 ? 'high' : d.pct >= 50 ? 'mid' : '';
+    html += `<div class="enso-bar-item">
+      <div class="enso-bar-bg"><div class="enso-bar-fill ${cls}" style="height:${h}px"></div></div>
+      <div class="enso-pct">${d.pct}%</div>
+      <div class="enso-label">${d.label}</div>
+    </div>`;
+  });
+  document.getElementById('ensoTimeline').innerHTML = html;
+}
+
+function saveEnso() {
+  const v = parseFloat(document.getElementById('enso-latest').value);
+  if (!isNaN(v) && v >= 0 && v <= 100) {
+    S.set('enso_custom', v);
+    renderEnso();
+    alert('저장됐습니다.');
+  }
+}
+
+function renderNormalValues() {
+  let html = '';
+  for (let m = 1; m <= 12; m++) {
+    html += `<div class="data-row">
+      <span class="data-key">${MONTH_KO[m]}</span>
+      <span class="data-val">${NORMAL[m].normal}mm 
+        ${NORMAL[m].pred !== NORMAL[m].normal
+          ? `<span class="tag ${NORMAL[m].pred > NORMAL[m].normal ? 'red' : 'blue'}">보정 ${NORMAL[m].pred}mm</span>`
+          : ''}
+      </span>
+    </div>`;
+  }
+  document.getElementById('normalValues').innerHTML = html;
+}
+
+// ============================================================
+// INIT
+// ============================================================
+renderMonthly();
+renderMonthPicker();
+renderHeatmap();
+renderActualInputs();
+renderCompare();
+renderFarm();
+renderEnso();
+renderNormalValues();
+
+// Load saved june-current
+const jc = S.get('june_current');
+if (jc !== null) document.getElementById('june-current').value = jc;
+document.getElementById('june-current').addEventListener('change', function() {
+  S.set('june_current', parseFloat(this.value) || 0);
+});
+</script>
+</body>
+</html>
