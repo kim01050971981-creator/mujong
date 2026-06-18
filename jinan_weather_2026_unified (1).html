@@ -389,7 +389,7 @@ const NORMAL = {
 };
 const MONTH_KO = ['','1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
 const MONTH_SHORT = ['','1','2','3','4','5','6','7','8','9','10','11','12'];
-const TODAY = new Date(2026,5,12); // June 12
+const TODAY = new Date(2026,5,18); // June 18 (오늘 날짜)
 const CURRENT_MONTH = 6;
 
 // Daily predicted rain by month (mm/day)
@@ -450,7 +450,7 @@ function renderMonthly() {
       <div class="m-name">${MONTH_KO[m]}${isCurrent ? ' <span class="tag blue">진행</span>' : ''}</div>
       <div class="m-pred">예측 ${pred}mm</div>
       ${actual !== null
-        ? `<div class="m-actual" style="color:${actual>pred?'var(--red)':'var(--blue)'}">${actual}mm (${actual>pred?'+':''}${actual-pred})</div>`
+        ? `<div class="m-actual" style="color:${actual>pred?'var(--red)':'var(--blue)'}">${actual}mm (${actual>pred?'+':''}${(actual-pred).toFixed(1)})</div>`
         : `<div class="m-actual" style="color:var(--gray-400)">미입력</div>`}
       <div class="m-bar-bg"><div class="m-bar ${actual>pred?'over':''}" style="width:${pct}%"></div></div>
       ${(isCurrent || !isPast) ? `
@@ -534,7 +534,7 @@ function renderHeatmap() {
     const actual = actuals[d] !== undefined ? actuals[d] : null;
     const displayMm = actual !== null ? actual : pred;
     const cls = getDayClass(displayMm);
-    const isToday = (m === 6 && d === 12);
+    const isToday = (m === 6 && d === 18);
     const hasActual = actual !== null;
     cells += `<div class="heatmap-cell ${cls}${isToday?' today':''}${hasActual?' actual':''}" 
       title="${d}일: ${hasActual ? '실측'+actual : '예측'+pred}mm"
@@ -545,7 +545,8 @@ function renderHeatmap() {
   // list
   const list = document.getElementById('dailyList');
   let html = '';
-  const rainDays = preds.map((p,i) => ({d:i+1, p})).filter(x => x.p > 0);
+  const rainDays = preds.map((p,i) => ({d:i+1, p}))
+    .filter(x => x.p > 0 || actuals[x.d] !== undefined);
   rainDays.forEach(({d, p}) => {
     const actual = actuals[d] !== undefined ? actuals[d] : null;
     html += `<div class="data-row">
@@ -675,12 +676,10 @@ async function fetchMonthlyAll() {
   btn.disabled = true;
   status.textContent = '불러오는 중...';
   status.style.color = 'var(--blue)';
-  status.style.color = 'var(--blue)';
 
   try {
-    const today = new Date(2026, 5, 12); // June 12
     const startDate = '2026-01-01';
-    const endDate = `2026-06-12`;
+    const endDate = '2026-06-18';
 
     const data = await fetchOpenMeteo(startDate, endDate);
     const times = data.daily.time;
@@ -728,7 +727,7 @@ async function fetchDailyActuals() {
     const mm = String(m).padStart(2, '0');
 
     // 미래달은 예측 API 사용, 과거달은 archive API
-    const today = new Date(2026, 5, 12);
+    const today = new Date(2026, 5, 18);
     const monthStart = new Date(2026, m-1, 1);
     const monthEnd = new Date(2026, m-1, daysInMonth);
 
@@ -740,7 +739,7 @@ async function fetchDailyActuals() {
     } else {
       // 과거/현재달: archive API
       const endStr = monthEnd > today
-        ? '2026-06-12'
+        ? '2026-06-18'
         : `2026-${mm}-${String(daysInMonth).padStart(2,'0')}`;
       data = await fetchOpenMeteo(`2026-${mm}-01`, endStr);
     }
