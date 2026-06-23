@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>지장물 물건조사 체크리스트 — 한끼채소</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+  :root {
+    --bg: #f3f0e7;
+    --surface: #ffffff;
+    --surface-2: #fbf9f4;
+    --border: #d9d2c0;
+    --border-light: #ece7da;
+    --text: #211f19;
+    --text-muted: #7c7460;
+    --text-faint: #a39a85;
+    --accent: #3d6b45;
+    --accent-deep: #2c4f33;
+    --accent-light: #e8f0e6;
+    --warn: #b5512f;
+    --warn-light: #f8e9e2;
+    --done-bg: #eef2fb;
+    --done-text: #2a5298;
+    --tag-bg: #ede7d8;
+    --shadow: 0 1px 2px rgba(40,35,20,0.06), 0 2px 8px rgba(40,35,20,0.05);
+    --radius: 10px;
+  }
+
+  [data-theme="dark"] {
+    --bg: #14160f;
+    --surface: #1d2017;
+    --surface-2: #20231a;
+    --border: #34381f;
+    --border-light: #2a2d1d;
+    --text: #ece8da;
+    --text-muted: #9a9a82;
+    --text-faint: #6c6d57;
+    --accent: #6fae74;
+    --accent-deep: #8fcf94;
+    --accent-light: #232b1e;
+    --warn: #e08a5e;
+    --warn-light: #2c2018;
+    --done-bg: #1c2433;
+    --done-text: #7fa3e6;
+    --tag-bg: #262918;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 2px 10px rgba(0,0,0,0.25);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+    transition: background 0.25s, color 0.25s;
+    padding-bottom: 40px;
+  }
+
+  .mono { font-family: 'JetBrains Mono', monospace; }
+
+  /* ── Header ── */
+  header {
+    background: linear-gradient(135deg, var(--accent-deep), var(--accent));
+    color: #fdfcf7;
+    padding: 18px 16px 16px;
+    position: sticky;
+    top: 0;
+    z-index: 200;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.18);
+  }
+  .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+  .farm-tag {
+    font-size: 10.5px;
+    letter-spacing: 0.12em;
+    opacity: 0.78;
+    text-transform: uppercase;
+    margin-bottom: 3px;
+    font-weight: 500;
+  }
+  header h1 {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  header .subtitle {
+    font-size: 11px;
+    opacity: 0.72;
+    margin-top: 3px;
+  }
+  .theme-toggle {
+    background: rgba(255,255,255,0.14);
+    border: 1px solid rgba(255,255,255,0.22);
+    border-radius: 20px;
+    width: 44px;
+    height: 26px;
+    position: relative;
+    cursor: pointer;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .theme-toggle .knob {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #fdfcf7;
+    transition: transform 0.25s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+  }
+  [data-theme="dark"] .theme-toggle .knob { transform: translateX(18px); }
+
+  .header-stats {
+    display: flex;
+    gap: 10px;
+    margin-top: 14px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
+  .stat-chip {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.16);
+    border-radius: 8px;
+    padding: 6px 10px;
+    flex-shrink: 0;
+    min-width: 64px;
+  }
+  .stat-chip .num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 15px;
+    font-weight: 700;
+    display: block;
+    line-height: 1.2;
+  }
+  .stat-chip .label { font-size: 9.5px; opacity: 0.75; white-space: nowrap; }
+
+  .progress-bar {
+    height: 5px;
+    background: rgba(255,255,255,0.18);
+    border-radius: 3px;
+    margin-top: 12px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: #f3d77a;
+    border-radius: 3px;
+    transition: width 0.3s;
+  }
+
+  /* ── Controls ── */
+  .controls {
+    padding: 12px 16px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border-light);
+    position: sticky;
+    top: 130px;
+    z-index: 150;
+  }
+  .search-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .search-input {
+    flex: 1;
+    padding: 9px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface-2);
+    color: var(--text);
+    font-size: 13.5px;
+    font-family: inherit;
+  }
+  .search-input:focus { outline: none; border-color: var(--accent); }
+  .reset-btn {
+    padding: 9px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface-2);
+    color: var(--text-muted);
+    font-size: 12.5px;
+    white-space: nowrap;
+  }
+
+  .tabs {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab {
+    flex-shrink: 0;
+    padding: 6px 12px;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+  .tab.active {
+    background: var(--accent);
+    color: #fdfcf7;
+    border-color: var(--accent);
+  }
+
+  /* ── Category section ── */
+  .cat-section { margin-top: 14px; }
+  .cat-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    margin-bottom: 6px;
+  }
+  .cat-title {
+    font-size: 13px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .cat-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .cat-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ── Item card ── */
+  .item-list { padding: 0 12px; display: flex; flex-direction: column; gap: 6px; }
+  .item {
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    transition: border-color 0.15s;
+  }
+  .item.checked { border-color: var(--accent); }
+
+  .item-main {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 11px 12px;
+    cursor: pointer;
+  }
+  .checkbox {
+    width: 21px;
+    height: 21px;
+    border-radius: 6px;
+    border: 2px solid var(--border);
+    flex-shrink: 0;
+    margin-top: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .item.checked .checkbox {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .checkbox::after {
+    content: '';
+    width: 9px;
+    height: 6px;
+    border-left: 2px solid white;
+    border-bottom: 2px solid white;
+    transform: rotate(-45deg) translate(0,-1px);
+    opacity: 0;
+  }
+  .item.checked .checkbox::after { opacity: 1; }
+
+  .item-body { flex: 1; min-width: 0; }
+  .item-name { font-size: 13.5px; font-weight: 600; line-height: 1.4; }
+  .item-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 4px;
+    flex-wrap: wrap;
+  }
+  .item-note { font-size: 11.5px; color: var(--text-muted); margin-top: 3px; line-height: 1.5; }
+
+  .comp-tag {
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 10px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .comp-transfer { background: var(--tag-bg); color: var(--text-muted); }
+  .comp-acquire  { background: var(--done-bg); color: var(--done-text); }
+  .comp-forced   { background: var(--warn-light); color: var(--warn); }
+  .comp-loss     { background: var(--accent-light); color: var(--accent-deep); }
+  .comp-separate { background: var(--tag-bg); color: var(--text-faint); }
+
+  .photo-badge {
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 10px;
+    background: var(--warn-light);
+    color: var(--warn);
+    font-weight: 600;
+  }
+
+  .expand-arrow {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-faint);
+    font-size: 11px;
+    transition: transform 0.2s;
+    margin-top: 2px;
+  }
+  .item.expanded .expand-arrow { transform: rotate(180deg); }
+
+  /* ── Item detail (expanded) ── */
+  .item-detail {
+    display: none;
+    padding: 0 12px 14px 43px;
+    border-top: 1px solid var(--border-light);
+    margin-top: 2px;
+    padding-top: 12px;
+  }
+  .item.expanded .item-detail { display: block; }
+
+  .qty-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .qty-row label { font-size: 11.5px; color: var(--text-muted); width: 50px; flex-shrink: 0; }
+  .qty-input {
+    width: 70px;
+    padding: 6px 8px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface-2);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    text-align: right;
+  }
+  .qty-unit { font-size: 11.5px; color: var(--text-muted); }
+  .price-display {
+    margin-left: auto;
+    text-align: right;
+  }
+  .price-display .subtotal {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .price-display .unit-price {
+    font-size: 10px;
+    color: var(--text-faint);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .area-helper {
+    background: var(--done-bg);
+    border-radius: 8px;
+    padding: 9px 10px;
+    margin-top: 8px;
+    margin-bottom: 4px;
+  }
+  .area-helper-text {
+    font-size: 10.5px;
+    color: var(--done-text);
+    font-weight: 600;
+    display: block;
+    margin-bottom: 6px;
+  }
+  .area-helper-links {
+    display: flex;
+    gap: 8px;
+  }
+  .area-helper-links a {
+    font-size: 11.5px;
+    color: var(--done-text);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 5px 9px;
+    text-decoration: none;
+    font-weight: 600;
+  }
+
+  /* Photo checklist */
+  .photo-section {
+    background: var(--surface-2);
+    border-radius: 8px;
+    padding: 10px;
+    margin-top: 8px;
+  }
+  .photo-section-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+  }
+  .photo-checks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+  .photo-check {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    padding: 5px 8px;
+    border-radius: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    cursor: pointer;
+  }
+  .photo-check.done {
+    background: var(--accent-light);
+    border-color: var(--accent);
+    color: var(--accent-deep);
+    font-weight: 600;
+  }
+  .photo-check .mini-check {
+    width: 13px; height: 13px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    flex-shrink: 0;
+  }
+  .photo-check.done .mini-check {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .photo-check .cam-icon { font-size: 12px; }
+  .photo-check input[type="file"] { display: none; }
+
+  .photo-thumbs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+  .photo-thumb {
+    position: relative;
+    width: 52px;
+    height: 52px;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .photo-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .photo-thumb .thumb-label {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0,0,0,0.55);
+    color: #fff;
+    font-size: 8px;
+    text-align: center;
+    padding: 1px 0;
+    line-height: 1.3;
+  }
+  .photo-thumb .thumb-del {
+    position: absolute;
+    top: 1px;
+    right: 1px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.6);
+    color: #fff;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+  }
+  .storage-warn {
+    font-size: 10px;
+    color: var(--warn);
+    margin-top: 6px;
+    display: none;
+  }
+  .storage-warn.show { display: block; }
+
+  .field-row { margin-bottom: 8px; }
+  .field-row label {
+    font-size: 10.5px;
+    color: var(--text-faint);
+    display: block;
+    margin-bottom: 3px;
+  }
+  .field-row input, .field-row textarea {
+    width: 100%;
+    padding: 7px 9px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 12.5px;
+  }
+  .field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+  /* ── Summary footer ── */
+  .summary-bar {
+    position: sticky;
+    bottom: 0;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    padding: 12px 16px;
+    box-shadow: 0 -4px 14px rgba(0,0,0,0.08);
+    z-index: 150;
+  }
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 4px;
+  }
+  .summary-row.total {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--accent);
+    margin-top: 6px;
+    padding-top: 8px;
+    border-top: 1px dashed var(--border);
+  }
+  .summary-label { font-size: 12px; color: var(--text-muted); }
+  .summary-value { font-family: 'JetBrains Mono', monospace; font-weight: 700; }
+
+  /* ── Bottom section: memo & export ── */
+  .bottom-section {
+    padding: 18px 16px;
+  }
+  .memo-box {
+    width: 100%;
+    min-height: 80px;
+    padding: 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 13px;
+    resize: vertical;
+  }
+  .section-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .export-btn {
+    width: 100%;
+    padding: 13px;
+    background: var(--accent);
+    color: #fdfcf7;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    margin-top: 14px;
+    cursor: pointer;
+  }
+  .export-btn:active { background: var(--accent-deep); }
+
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-faint);
+    font-size: 13px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+</style>
+</head>
+<body data-theme="light">
+
+<header>
+  <div class="header-top">
+    <div>
+      <div class="farm-tag">한끼채소 · 화성진안 공공주택지구</div>
+      <h1>지장물 물건조사 체크리스트</h1>
+      <div class="subtitle">화성시 진안동 · 보상 대비 현장 조사용</div>
+    </div>
+    <div class="theme-toggle" id="themeToggle"><div class="knob">☀</div></div>
+  </div>
+  <div class="header-stats" id="headerStats"></div>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+</header>
+
+<div class="controls">
+  <div class="search-row">
+    <input type="text" class="search-input" id="searchInput" placeholder="품목명 검색...">
+    <button class="reset-btn" id="resetBtn">전체초기화</button>
+  </div>
+  <div class="tabs" id="tabs"></div>
+</div>
+
+<div id="catContainer"></div>
+
+<div class="bottom-section">
+  <div class="section-label">현장 메모</div>
+  <textarea class="memo-box" id="memoBox" placeholder="추가 품목, 특이사항, 측량 예정일 등 자유롭게 기록..."></textarea>
+  <button class="export-btn" id="exportBtn">조사 결과 텍스트로 내보내기</button>
+</div>
+
+<div class="summary-bar">
+  <div class="summary-row">
+    <span class="summary-label">체크 항목</span>
+    <span class="summary-value mono" id="sumChecked">0 / 0</span>
+  </div>
+  <div class="summary-row total">
+    <span class="summary-label">참고 견적 합계</span>
+    <span class="summary-value mono" id="sumTotal">0원</span>
+  </div>
+</div>
+
+<script>
+const CATEGORIES = [
+  { key: 'building',  label: '건축물',     short: '건축', color: '#b5512f' },
+  { key: 'structure', label: '공작물',     short: '공작', color: '#7a6a3f' },
+  { key: 'tree',      label: '수목',       short: '수목', color: '#3d6b45' },
+  { key: 'crop',      label: '농작물',     short: '농작', color: '#5a8a3a' },
+  { key: 'movable',   label: '동산',       short: '동산', color: '#2a5298' },
+  { key: 'electric',  label: '전기·통신',  short: '전기', color: '#6b4a8a' },
+  { key: 'climate',   label: '난방·냉방',  short: '냉난방', color: '#a8482f' },
+  { key: 'waste',     label: '퇴비·폐기물', short: '퇴비', color: '#6a5a3a' },
+  { key: 'lossagri',  label: '농업손실',   short: '손실', color: '#8a3a3a' },
+];
+
+const COMP_LABEL = {
+  transfer: { text: '이전비',     cls: 'comp-transfer' },
+  acquire:  { text: '취득가비교', cls: 'comp-acquire' },
+  forced:   { text: '이전불가→취득가', cls: 'comp-forced' },
+  loss:     { text: '영농손실',   cls: 'comp-loss' },
+  separate: { text: '별도산정',   cls: 'comp-separate' },
+};
+
+const ITEMS = [
+  { id:'b01', name:'비닐하우스 1동 (단동)',        type:'building', unit:'㎡', price:30000,  comp:'transfer', note:'설치연도·면적 확인. 단동 PE 1중 기준', photo:true },
+  { id:'b02', name:'비닐하우스 2동 (단동)',        type:'building', unit:'㎡', price:30000,  comp:'transfer', note:'동별 면적 별도 기재', photo:true },
+  { id:'b03', name:'비닐하우스 3동 (연동)',        type:'building', unit:'㎡', price:35000,  comp:'transfer', note:'연동형은 단가 상향', photo:true },
+  { id:'b04', name:'비닐하우스 4동',               type:'building', unit:'㎡', price:30000,  comp:'transfer', note:'', photo:true },
+  { id:'b05', name:'비닐하우스 5동 (육묘용)',      type:'building', unit:'㎡', price:35000,  comp:'transfer', note:'육묘업 등록 연계 시 가치 상향', photo:true },
+  { id:'b06', name:'농막(신고된 가설건축물)',      type:'building', unit:'동', price:3000000,comp:'transfer', note:'가설건축물 신고필증 확인 필수', photo:true },
+  { id:'b07', name:'농막(무신고)',                 type:'building', unit:'동', price:1500000,comp:'forced',   note:'무신고 시 감액 또는 보상 제외 위험', photo:true },
+  { id:'b08', name:'농기계 창고',                  type:'building', unit:'㎡', price:200000, comp:'transfer', note:'경량철골', photo:true },
+  { id:'b09', name:'육묘장 시설',                  type:'building', unit:'㎡', price:80000,  comp:'transfer', note:'육묘업 등록 시 보상 근거 강화', photo:true },
+  { id:'b10', name:'창고(컨테이너 20ft)',          type:'building', unit:'동', price:3000000,comp:'transfer', note:'', photo:true },
+
+  { id:'s01', name:'옹벽(콘크리트)',               type:'structure', unit:'m', price:150000, comp:'transfer', note:'높이·길이 실측', photo:true },
+  { id:'s02', name:'배수로(콘크리트 U형)',         type:'structure', unit:'m', price:60000,  comp:'transfer', note:'', photo:true },
+  { id:'s03', name:'배수로(PE·PVC)',               type:'structure', unit:'m', price:30000,  comp:'transfer', note:'', photo:true },
+  { id:'s04', name:'석축',                         type:'structure', unit:'m', price:120000, comp:'transfer', note:'', photo:true },
+  { id:'s05', name:'담장(블록조)',                 type:'structure', unit:'m', price:80000,  comp:'transfer', note:'', photo:false },
+  { id:'s06', name:'철망펜스',                     type:'structure', unit:'m', price:25000,  comp:'transfer', note:'', photo:false },
+  { id:'s07', name:'강관펜스',                      type:'structure', unit:'m', price:35000,  comp:'transfer', note:'', photo:false },
+  { id:'s08', name:'콘크리트 포장도로(두께15cm)',   type:'structure', unit:'㎡', price:35000,  comp:'transfer', note:'', photo:true },
+  { id:'s09', name:'아스팔트 포장(두께5cm)',        type:'structure', unit:'㎡', price:25000,  comp:'transfer', note:'', photo:false },
+  { id:'s10', name:'관정(지하수, 100m 미만)',       type:'structure', unit:'개소', price:5000000,comp:'transfer', note:'구경·깊이 실측', photo:true },
+  { id:'s11', name:'관정(100~200m)',               type:'structure', unit:'개소', price:9000000,comp:'transfer', note:'', photo:true },
+  { id:'s12', name:'정화조',                        type:'structure', unit:'기', price:1500000,comp:'transfer', note:'', photo:true },
+  { id:'s13', name:'맨홀·집수정',                   type:'structure', unit:'개', price:200000, comp:'transfer', note:'', photo:false },
+  { id:'s14', name:'야자매트·코코메트 시공',        type:'structure', unit:'㎡', price:8000,   comp:'transfer', note:'사면 안정화 공사 — 시공 사진·영수증 필수', photo:true },
+  { id:'s15', name:'견사(개집, 고정식)',            type:'structure', unit:'동', price:800000, comp:'transfer', note:'고정 콘크리트 기초 있는 경우만 공작물', photo:true },
+  { id:'s16', name:'퇴비사(콘크리트)',              type:'structure', unit:'㎡', price:150000, comp:'transfer', note:'', photo:true },
+  { id:'s17', name:'태양광 패널 구조물',            type:'structure', unit:'기', price:2500000,comp:'acquire', note:'설치비·발전사업 등록 여부 확인', photo:true },
+  { id:'s18', name:'관수 점적라인 시스템',          type:'structure', unit:'세트', price:1500000,comp:'transfer', note:'', photo:false },
+  { id:'s19', name:'스프링클러 시스템',             type:'structure', unit:'세트', price:2000000,comp:'transfer', note:'', photo:false },
+
+  { id:'t01', name:'조형소나무',                    type:'tree', unit:'주', price:3000000, comp:'acquire', note:'수고·흉고직경·수형 사진. 구입영수증 필수', photo:true },
+  { id:'t02', name:'반송(다행성 소나무)',           type:'tree', unit:'주', price:2500000, comp:'acquire', note:'', photo:true },
+  { id:'t03', name:'메타세쿼이아',                  type:'tree', unit:'주', price:300000,  comp:'acquire', note:'수고 실측', photo:true },
+  { id:'t04', name:'감나무',                        type:'tree', unit:'주', price:150000,  comp:'acquire', note:'결실주는 가치 상향', photo:true },
+  { id:'t05', name:'철쭉',                          type:'tree', unit:'주', price:30000,   comp:'acquire', note:'', photo:false },
+  { id:'t06', name:'산수유',                        type:'tree', unit:'주', price:120000,  comp:'acquire', note:'', photo:true },
+  { id:'t07', name:'밤나무',                        type:'tree', unit:'주', price:130000,  comp:'acquire', note:'', photo:false },
+  { id:'t08', name:'대추나무',                       type:'tree', unit:'주', price:100000,  comp:'acquire', note:'', photo:false },
+  { id:'t09', name:'기타 조경수(소형)',             type:'tree', unit:'주', price:50000,   comp:'acquire', note:'수종·규격 별도 기재', photo:false },
+  { id:'t10', name:'맥문동 등 지피식물',            type:'tree', unit:'㎡', price:15000,   comp:'acquire', note:'군락 면적으로 산정', photo:false },
+
+  { id:'c01', name:'고추',                          type:'crop', unit:'㎡', price:8000, comp:'loss', note:'영농손실은 별도 산정(통계 기준)', photo:true },
+  { id:'c02', name:'상추',                          type:'crop', unit:'㎡', price:5000, comp:'loss', note:'', photo:false },
+  { id:'c03', name:'들깨(잎)',                      type:'crop', unit:'㎡', price:6000, comp:'loss', note:'', photo:false },
+  { id:'c04', name:'육묘 모종(트레이 단위)',        type:'crop', unit:'판', price:3000, comp:'loss', note:'재배일지·판매내역 증빙', photo:true },
+
+  { id:'m01', name:'트랙터',                        type:'movable', unit:'대', price:15000000, comp:'acquire', note:'마력·연식별 중고시세 별도 확인', photo:true },
+  { id:'m02', name:'경운기',                        type:'movable', unit:'대', price:2000000,  comp:'acquire', note:'', photo:true },
+  { id:'m03', name:'관리기',                        type:'movable', unit:'대', price:1500000,  comp:'acquire', note:'', photo:false },
+  { id:'m04', name:'현대 포터2 트럭',                type:'movable', unit:'대', price:8000000,  comp:'acquire', note:'차량등록증·시세표 첨부', photo:true },
+  { id:'m05', name:'동력분무기',                    type:'movable', unit:'대', price:800000,   comp:'acquire', note:'', photo:false },
+  { id:'m06', name:'예초기',                        type:'movable', unit:'대', price:300000,   comp:'acquire', note:'', photo:false },
+  { id:'m07', name:'육묘 자재(트레이·상토 등)',     type:'movable', unit:'세트', price:500000,  comp:'acquire', note:'재고 수량 사진', photo:true },
+  { id:'m08', name:'간이 개집(이동식)',              type:'movable', unit:'개', price:100000,  comp:'transfer', note:'고정 기초 없으면 동산', photo:false },
+  { id:'m09', name:'가재도구 일반',                  type:'movable', unit:'세트', price:1000000, comp:'transfer', note:'농막 내 생활용품 일괄', photo:false },
+
+  { id:'e01', name:'전기 계량기·배전함',             type:'electric', unit:'개소', price:500000, comp:'transfer', note:'', photo:true },
+  { id:'e02', name:'CCTV·통신장비',                 type:'electric', unit:'대', price:300000,  comp:'transfer', note:'', photo:false },
+  { id:'e03', name:'복합환경 통합제어컴퓨터',        type:'electric', unit:'대', price:3000000, comp:'acquire', note:'스마트팜 설비, KS인증 여부 확인', photo:true },
+  { id:'e04', name:'자동개폐기·모터류',              type:'electric', unit:'대', price:800000,  comp:'transfer', note:'', photo:false },
+
+  { id:'h01', name:'보일러(농업용 소형)',            type:'climate', unit:'대', price:800000,  comp:'transfer', note:'', photo:false },
+  { id:'h02', name:'보일러(산업용)',                 type:'climate', unit:'대', price:5000000, comp:'transfer', note:'', photo:true },
+  { id:'h03', name:'에어컨 실외기',                  type:'climate', unit:'대', price:500000,  comp:'transfer', note:'', photo:false },
+  { id:'h04', name:'온실 난방기',                    type:'climate', unit:'대', price:1500000, comp:'transfer', note:'', photo:false },
+
+  { id:'w01', name:'퇴비장(이동식)',                 type:'waste', unit:'개', price:300000,  comp:'transfer', note:'', photo:false },
+  { id:'w02', name:'폐비닐·폐기물 적재 현황',        type:'waste', unit:'-', price:0,        comp:'separate', note:'철거 전 현황 사진만 — 보상 대상 아님 주의', photo:true },
+
+  { id:'l01', name:'농업경영체 등록 확인',           type:'lossagri', unit:'-', price:0, comp:'separate', note:'등록증 사본 확보 — 영농손실보상 전제조건', photo:false },
+  { id:'l02', name:'영농손실보상 산정(통계작물)',    type:'lossagri', unit:'-', price:0, comp:'loss', note:'농작물실제소득인정기준 적용 여부 확인', photo:false },
+  { id:'l03', name:'직접생산 증빙(농산물 판매내역)', type:'lossagri', unit:'-', price:0, comp:'separate', note:'농협 출하·직거래 영수증 등', photo:false },
+];
+
+const PHOTO_TASKS = [
+  { key:'wide', label:'전경' },
+  { key:'close', label:'근접' },
+  { key:'spec', label:'규격확인' },
+  { key:'year', label:'설치연도' },
+  { key:'around', label:'주변현황' },
+];
+
+const STORAGE_KEY = 'jiangmul_survey_v1';
+let state = loadState();
+let activeTab = 'all';
+let searchQuery = '';
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch(e) { return {}; }
+}
+function saveState() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch (e) {
+    console.warn('저장 공간 부족', e);
+    throw e;
+  }
+}
+function getItemState(id) {
+  if (!state[id]) state[id] = { checked:false, qty:1, expanded:false, photos:{}, photoData:{}, photoFile:'', photoLoc:'', photoDate:'', photoBy:'' };
+  if (!state[id].photoData) state[id].photoData = {};
+  return state[id];
+}
+
+function fmtWon(n) {
+  return n.toLocaleString('ko-KR') + '원';
+}
+
+function renderTabs() {
+  const tabs = document.getElementById('tabs');
+  let html = `<div class="tab ${activeTab==='all'?'active':''}" data-tab="all">전체</div>`;
+  CATEGORIES.forEach(c => {
+    html += `<div class="tab ${activeTab===c.key?'active':''}" data-tab="${c.key}">${c.short}</div>`;
+  });
+  tabs.innerHTML = html;
+  tabs.querySelectorAll('.tab').forEach(el => {
+    el.addEventListener('click', () => {
+      activeTab = el.dataset.tab;
+      renderTabs();
+      renderItems();
+    });
+  });
+}
+
+function itemMatchesSearch(item) {
+  if (!searchQuery) return true;
+  return item.name.toLowerCase().includes(searchQuery) || item.note.toLowerCase().includes(searchQuery);
+}
+
+function renderItems() {
+  const container = document.getElementById('catContainer');
+  container.innerHTML = '';
+
+  const cats = activeTab === 'all' ? CATEGORIES : CATEGORIES.filter(c => c.key === activeTab);
+  let anyRendered = false;
+
+  cats.forEach(cat => {
+    const items = ITEMS.filter(i => i.type === cat.key && itemMatchesSearch(i));
+    if (items.length === 0) return;
+    anyRendered = true;
+
+    const section = document.createElement('div');
+    section.className = 'cat-section';
+
+    const checkedCount = items.filter(i => getItemState(i.id).checked).length;
+
+    section.innerHTML = `
+      <div class="cat-header">
+        <div class="cat-title"><span class="cat-dot" style="background:${cat.color}"></span>${cat.label}</div>
+        <div class="cat-sub">${checkedCount} / ${items.length}</div>
+      </div>
+      <div class="item-list" id="list-${cat.key}"></div>
+    `;
+    container.appendChild(section);
+
+    const list = section.querySelector(`#list-${cat.key}`);
+    items.forEach(item => {
+      list.appendChild(renderItemCard(item));
+    });
+  });
+
+  if (!anyRendered) {
+    container.innerHTML = `<div class="empty-state">검색 결과가 없습니다.</div>`;
+  }
+
+  updateSummary();
+}
+
+function renderItemCard(item) {
+  const st = getItemState(item.id);
+  const div = document.createElement('div');
+  div.className = `item ${st.checked ? 'checked' : ''} ${st.expanded ? 'expanded' : ''}`;
+
+  const compInfo = COMP_LABEL[item.comp];
+  const subtotal = (Number(st.qty) || 0) * item.price;
+
+  div.innerHTML = `
+    <div class="item-main">
+      <div class="checkbox" data-action="check"></div>
+      <div class="item-body" data-action="expand">
+        <div class="item-name">${item.name}</div>
+        <div class="item-meta">
+          <span class="comp-tag ${compInfo.cls}">${compInfo.text}</span>
+          ${item.photo ? '<span class="photo-badge">📷 사진필요</span>' : ''}
+        </div>
+        ${item.note ? `<div class="item-note">${item.note}</div>` : ''}
+      </div>
+      <div class="expand-arrow" data-action="expand">▾</div>
+    </div>
+    <div class="item-detail">
+      <div class="qty-row">
+        <label>수량</label>
+        <input type="number" class="qty-input" data-action="qty" value="${st.qty}" min="0" step="0.1">
+        <span class="qty-unit">${item.unit}</span>
+        <div class="price-display">
+          <div class="subtotal mono">${fmtWon(subtotal)}</div>
+          <div class="unit-price mono">단가 ${item.price.toLocaleString('ko-KR')}/${item.unit}</div>
+        </div>
+      </div>
+      ${item.unit === '㎡' ? renderAreaHelper() : ''}
+      ${item.photo ? renderPhotoSection(item, st) : ''}
+    </div>
+  `;
+
+  div.querySelectorAll('[data-action="check"]').forEach(el => {
+    el.addEventListener('click', (e) => {
+      e.stopPropagation();
+      st.checked = !st.checked;
+      saveState();
+      renderItems();
+    });
+  });
+  div.querySelectorAll('[data-action="expand"]').forEach(el => {
+    el.addEventListener('click', () => {
+      st.expanded = !st.expanded;
+      saveState();
+      renderItems();
+    });
+  });
+  const qtyInput = div.querySelector('[data-action="qty"]');
+  if (qtyInput) {
+    qtyInput.addEventListener('click', e => e.stopPropagation());
+    qtyInput.addEventListener('input', (e) => {
+      st.qty = e.target.value;
+      saveState();
+      const sub = (Number(st.qty) || 0) * item.price;
+      div.querySelector('.subtotal').textContent = fmtWon(sub);
+      updateSummary();
+    });
+  }
+
+  if (item.photo) {
+    div.querySelectorAll('.photo-check').forEach(el => {
+      el.addEventListener('click', (e) => {
+        e.stopPropagation();
+      });
+    });
+    div.querySelectorAll('[data-cam]').forEach(el => {
+      el.addEventListener('change', (e) => {
+        const key = el.dataset.cam;
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        compressImage(file, (dataUrl) => {
+          if (!dataUrl) {
+            alert('이미지 처리에 실패했습니다. 다시 시도해주세요.');
+            return;
+          }
+          st.photoData[key] = dataUrl;
+          st.photos[key] = true;
+          try {
+            saveState();
+          } catch (err) {
+            delete st.photoData[key];
+            st.photos[key] = false;
+            alert('저장 공간이 부족합니다. 다른 항목의 사진을 일부 지우거나, 내보내기 후 전체초기화로 정리해주세요.');
+          }
+          renderItems();
+        });
+      });
+    });
+    div.querySelectorAll('[data-del]').forEach(el => {
+      el.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const key = el.dataset.del;
+        delete st.photoData[key];
+        st.photos[key] = false;
+        saveState();
+        renderItems();
+      });
+    });
+    ['photoFile','photoLoc','photoDate','photoBy'].forEach(field => {
+      const input = div.querySelector(`[data-field="${field}"]`);
+      if (input) {
+        input.addEventListener('click', e => e.stopPropagation());
+        input.addEventListener('input', (e) => {
+          st[field] = e.target.value;
+          saveState();
+        });
+      }
+    });
+  }
+
+  return div;
+}
+
+// 카메라로 찍은 사진을 작게 압축(가로 480px, JPEG 70%)해서 base64로 반환
+function compressImage(file, callback) {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const img = new Image();
+    img.onload = () => {
+      const maxW = 480;
+      const scale = Math.min(1, maxW / img.width);
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.round(img.width * scale);
+      canvas.height = Math.round(img.height * scale);
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      callback(canvas.toDataURL('image/jpeg', 0.7));
+    };
+    img.onerror = () => callback(null);
+    img.src = e.target.result;
+  };
+  reader.onerror = () => callback(null);
+  reader.readAsDataURL(file);
+}
+
+function renderAreaHelper() {
+  return `
+    <div class="area-helper">
+      <span class="area-helper-text">📐 면적 참고측정 (정확한 값은 지적측량 결과 우선)</span>
+      <div class="area-helper-links">
+        <a href="https://map.naver.com" target="_blank" rel="noopener" onclick="event.stopPropagation()">네이버지도 면적재기</a>
+        <a href="https://map.kakao.com" target="_blank" rel="noopener" onclick="event.stopPropagation()">카카오맵 면적재기</a>
+      </div>
+    </div>
+  `;
+}
+
+function renderPhotoSection(item, st) {
+  const doneCount = PHOTO_TASKS.filter(t => st.photos[t.key]).length;
+  const thumbsHtml = PHOTO_TASKS
+    .filter(t => st.photoData && st.photoData[t.key])
+    .map(t => `
+      <div class="photo-thumb">
+        <img src="${st.photoData[t.key]}" alt="${t.label}">
+        <div class="thumb-label">${t.label}</div>
+        <div class="thumb-del" data-del="${t.key}">×</div>
+      </div>
+    `).join('');
+
+  return `
+    <div class="photo-section" onclick="event.stopPropagation()">
+      <div class="photo-section-title"><span>📷 사진 촬영 체크리스트</span><span class="mono">${doneCount}/${PHOTO_TASKS.length}</span></div>
+      ${thumbsHtml ? `<div class="photo-thumbs">${thumbsHtml}</div>` : ''}
+      <div class="photo-checks">
+        ${PHOTO_TASKS.map(t => `
+          <label class="photo-check ${st.photos[t.key] ? 'done' : ''}" data-key="${t.key}">
+            <span class="mini-check"></span><span class="cam-icon">📸</span>${t.label}
+            <input type="file" accept="image/*" capture="environment" data-cam="${t.key}">
+          </label>
+        `).join('')}
+      </div>
+      <div class="field-grid">
+        <div class="field-row">
+          <label>파일명 (참고용)</label>
+          <input type="text" data-field="photoFile" value="${st.photoFile||''}" placeholder="예: IMG_0231.jpg">
+        </div>
+        <div class="field-row">
+          <label>저장 위치</label>
+          <input type="text" data-field="photoLoc" value="${st.photoLoc||''}" placeholder="예: 카카오앨범/진안지구">
+        </div>
+        <div class="field-row">
+          <label>촬영일</label>
+          <input type="text" data-field="photoDate" value="${st.photoDate||''}" placeholder="2026-06-22">
+        </div>
+        <div class="field-row">
+          <label>촬영자</label>
+          <input type="text" data-field="photoBy" value="${st.photoBy||''}" placeholder="이름">
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function updateSummary() {
+  let checkedTotal = 0;
+  let grandTotal = 0;
+  const catTotals = {};
+  CATEGORIES.forEach(c => catTotals[c.key] = 0);
+
+  ITEMS.forEach(item => {
+    const st = getItemState(item.id);
+    if (st.checked) {
+      checkedTotal++;
+      const sub = (Number(st.qty) || 0) * item.price;
+      grandTotal += sub;
+      catTotals[item.type] += sub;
+    }
+  });
+
+  document.getElementById('sumChecked').textContent = `${checkedTotal} / ${ITEMS.length}`;
+  document.getElementById('sumTotal').textContent = fmtWon(grandTotal);
+
+  const pct = ITEMS.length ? Math.round((checkedTotal / ITEMS.length) * 100) : 0;
+  document.getElementById('progressFill').style.width = pct + '%';
+
+  const statsEl = document.getElementById('headerStats');
+  statsEl.innerHTML = CATEGORIES.map(c => {
+    const n = ITEMS.filter(i => i.type === c.key && getItemState(i.id).checked).length;
+    const t = ITEMS.filter(i => i.type === c.key).length;
+    return `<div class="stat-chip"><span class="num mono">${n}/${t}</span><span class="label">${c.short}</span></div>`;
+  }).join('');
+}
+
+function exportText() {
+  const lines = [];
+  lines.push('지장물 물건조사 결과 — 한끼채소 (화성진안 공공주택지구)');
+  lines.push('생성일: ' + new Date().toLocaleString('ko-KR'));
+  lines.push('='.repeat(50));
+
+  let grandTotal = 0;
+  CATEGORIES.forEach(cat => {
+    const items = ITEMS.filter(i => i.type === cat.key);
+    const checked = items.filter(i => getItemState(i.id).checked);
+    if (checked.length === 0) return;
+
+    lines.push('');
+    lines.push(`[${cat.label}]`);
+    checked.forEach(item => {
+      const st = getItemState(item.id);
+      const qty = Number(st.qty) || 0;
+      const sub = qty * item.price;
+      grandTotal += sub;
+      lines.push(`- ${item.name} | 수량 ${qty}${item.unit} | 단가 ${item.price.toLocaleString('ko-KR')}원 | 소계 ${sub.toLocaleString('ko-KR')}원 | ${COMP_LABEL[item.comp].text}`);
+      if (item.note) lines.push(`    메모: ${item.note}`);
+      if (item.photo) {
+        const doneTasks = PHOTO_TASKS.filter(t => st.photos[t.key]).map(t => t.label);
+        lines.push(`    사진체크: ${doneTasks.length}/${PHOTO_TASKS.length} (${doneTasks.join(', ') || '없음'})`);
+        if (st.photoFile) lines.push(`    파일명: ${st.photoFile}`);
+        if (st.photoLoc) lines.push(`    저장위치: ${st.photoLoc}`);
+        if (st.photoDate) lines.push(`    촬영일: ${st.photoDate}`);
+        if (st.photoBy) lines.push(`    촬영자: ${st.photoBy}`);
+      }
+    });
+  });
+
+  lines.push('');
+  lines.push('='.repeat(50));
+  lines.push(`총 참고 견적 합계: ${grandTotal.toLocaleString('ko-KR')}원`);
+  const memo = document.getElementById('memoBox').value;
+  if (memo) {
+    lines.push('');
+    lines.push('[현장 메모]');
+    lines.push(memo);
+  }
+
+  const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `지장물조사_${new Date().toISOString().slice(0,10)}.txt`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// Theme
+function initTheme() {
+  const saved = localStorage.getItem('jiangmul_theme') || 'light';
+  document.body.setAttribute('data-theme', saved);
+  document.querySelector('#themeToggle .knob').textContent = saved === 'dark' ? '🌙' : '☀';
+}
+document.getElementById('themeToggle').addEventListener('click', () => {
+  const cur = document.body.getAttribute('data-theme');
+  const next = cur === 'dark' ? 'light' : 'dark';
+  document.body.setAttribute('data-theme', next);
+  document.querySelector('#themeToggle .knob').textContent = next === 'dark' ? '🌙' : '☀';
+  localStorage.setItem('jiangmul_theme', next);
+});
+
+// Search
+document.getElementById('searchInput').addEventListener('input', (e) => {
+  searchQuery = e.target.value.trim().toLowerCase();
+  renderItems();
+});
+
+// Reset
+document.getElementById('resetBtn').addEventListener('click', () => {
+  if (confirm('모든 체크와 입력값을 초기화할까요? (메모는 유지됩니다)')) {
+    state = {};
+    saveState();
+    renderItems();
+  }
+});
+
+// Memo
+const memoBox = document.getElementById('memoBox');
+memoBox.value = localStorage.getItem('jiangmul_memo') || '';
+memoBox.addEventListener('input', (e) => {
+  localStorage.setItem('jiangmul_memo', e.target.value);
+});
+
+// Export
+document.getElementById('exportBtn').addEventListener('click', exportText);
+
+// Init
+initTheme();
+renderTabs();
+renderItems();
+</script>
+</body>
+</html>
